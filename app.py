@@ -81,23 +81,21 @@ def get_reviews_data():
         })
 
     return rev
+
+
+
 def get_reviews():
-    query2 = "SELECT TOP 100 c.city, c.review FROM c"
-    options = {"enableCrossPartitionQuery": True}  # 如果集合是分区集合，需要启用跨分区查询
-
-    # 执行查询
-
-    reviews_data_q = list(client.QueryDocuments(f"dbs/{DATABASE_ID}/colls/{COLLECTION_ID2}", query2, options))
-
-
-    reviews_data = []
-    for item in reviews_data_q:
-        reviews_data.append({
-            "city": item['city'],
-            "review": item['review']
+    sql = "SELECT  c.city, c.score FROM c"
+    o = {"enableCrossPartitionQuery": True}
+    r = list(client.QueryDocuments(f"dbs/{DATABASE_ID}/colls/{COLLECTION_ID2}", sql, o))
+    c = []
+    for i in r:
+        c.append({
+            "city": i['city'],
+            "score": i['score']
         })
+    return c
 
-    return reviews_data
 
 @app.route('/', methods=['GET'])
 def hello():  # put application's code here
@@ -184,7 +182,7 @@ def average_review():
         print("从缓存中获取数据")
         return Response(cached_result, content_type='application/json')
 
-    cities_data = get_cities_data()
+    cities_data = get_cities()
     city_data = next((city for city in cities_data if city["city"] == city_name), None)
 
     if not city_data:
@@ -202,7 +200,7 @@ def average_review():
 
     display_cities = [city["city"] for city in sorted_cities]
 
-    reviews_data = get_reviews_data()
+    reviews_data = get_reviews()
 
     result = []
     for city1 in display_cities:
