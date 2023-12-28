@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Average Review Scores</title>
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+</head>
+<body>
+    <div class="header">
+        <p>Liu Dailin and Liu Minghao</p>
+        <p>76397 and 75990</p>
+        <img src="../static/Liu.jpg" alt="Liu Dailin" width="100">
+        <img src="../static/Liu2.jpg" alt="Liu Minghao" width="100">
+    </div>
+
+    <script src="../static/chart.js"></script>
+
+    <div class="api-form">
+        <h3>Average Review Scores API</h3>
+        <input type="text" id="city" placeholder="City">
+        <input type="text" id="page" placeholder="page">
+        <button onclick="getAverageReviewScores()">Get Average Review Scores</button>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="chart-container">
+        <canvas id="averageReviewScoresChart"></canvas>
+    </div>
+
+    <!-- Response -->
+    <div class="response" id="response"></div>
+
+    <script>
+        function getAverageReviewScores() {
+            const city = document.getElementById('city').value;
+            const page = document.getElementById('page').value;
+
+            fetch(`/average_review?city=${city}&page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    const responseElement = document.getElementById('response');
+
+                    // Extract data for Chart.js
+                    const cities = data.result.map(item => item.city);
+                    const reviewScores = data.result.map(item => item.average_review_score);
+
+                    // Draw Chart
+                    drawLineChart(cities, reviewScores);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function drawLineChart(labels, data) {
+            const ctx = document.getElementById('averageReviewScoresChart').getContext('2d');
+
+            // 获取现有的图表实例
+            const existingChart = Chart.getChart(ctx);
+
+            // 如果存在图表实例，则销毁它
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Review Score',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'City'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Average Review Score'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

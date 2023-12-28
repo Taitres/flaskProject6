@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+</head>
+<body>
+<div class="header">
+    <p>Liu Dailin and Liu Minghao</p>
+    <p>76397 and 75990</p>
+    <img src="../static/Liu.jpg" alt="Liu Dailin" width="100">
+    <img src="../static/Liu2.jpg" alt="Liu Minghao" width="100">
+</div>
+<script src="../static/chart.js"></script>
+<!-- Updated HTML with Chart.js for Closest Cities -->
+<div class="api-form">
+    <h3>Closest Cities API</h3>
+    <input type="text" id="classes" placeholder="classes">
+    <input type="text" id="k" placeholder="k">
+    <input type="text" id="words" placeholder="words">
+    <button onclick="getClosestCities()">Get Closest Cities</button>
+</div>
+
+
+<!-- KNN Review Chart Container -->
+<div>
+    <canvas id="knnReviewsChart"></canvas>
+</div>
+
+<!-- Response -->
+<div class="response" id="response"></div>
+<script>
+    function getClosestCities() {
+        const classes = document.getElementById('classes').value;
+        const k = document.getElementById('k').value;
+        const words = document.getElementById('words').value;
+
+        fetch(`/knn_reviews?classes=${classes}&k=${k}&words=${words}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                const responseElement = document.getElementById('response');
+
+                // Extract data for Chart.js
+                const labels = data.clusters.map(item => item.classId); // Use cluster's center city as label
+                const data1 = data.clusters.map(item => item.population); // Use weighted average score as dat
+
+                // Draw Chart
+                drawPieChart(labels, data1);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function drawPieChart(labels, data) {
+        var ctx = document.getElementById('knnReviewsChart');
+
+        // 获取现有的图表实例
+        const existingChart = Chart.getChart(ctx);
+
+        // 如果存在图表实例，则销毁它
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Review Counts',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+    }
+</script>
+</body>
+</html>
