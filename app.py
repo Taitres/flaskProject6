@@ -128,7 +128,7 @@ def closest_cities():
         return Response(cached_result, content_type='application/json')
 
     # 如果缓存数据不存在，执行计算和排序操作
-    cities_data = get_cities_data()
+    cities_data = get_cities()
     start_time = time.time()
 
     # Fetch data from Cosmos DB (replace this with actual Cosmos DB query)
